@@ -26,9 +26,15 @@ def handle_invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
 
 # generate sitemap with all your endpoints
-@app.route('/')
-def sitemap():
-    return generate_sitemap(app)
+@app.route("/grandparents",methods=['GET'])
+def all_Grandpa():
+    grandparents = GrandParents.get_all()
+    grandpa_Dic = []
+    for person in grandparents :
+       grandpa_Dic.append(person.serialize())
+    return jsonify(grandpa_Dic)
+
+
 
 @app.route('/user', methods=['GET'])
 def handle_hello():
