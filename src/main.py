@@ -34,7 +34,11 @@ def all_Grandpa():
        grandpa_Dic.append(person.serialize())
     return jsonify(grandpa_Dic)
 
-
+@app.route("/grandparents/<int:id>",methods=['GET'])
+def get_Grandpa(id):
+    grandparents = GrandParents.get_member(id)
+    grandparents_serialize= grandparents.serialize()
+    return jsonify(grandparents_serialize)
 
 @app.route('/user', methods=['GET'])
 def handle_hello():
