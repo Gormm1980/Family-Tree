@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-class BasicMode():
+class BasicModel():
     @classmethod
     def get_all(cls):
         return cls.query.all()
@@ -10,6 +10,7 @@ class BasicMode():
     @classmethod
     def get_member(cls,model_id):
         return cls.query.filter_by(id = model_id).first()
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -26,8 +27,9 @@ class User(db.Model):
             # do not serialize the password, its a security breach
         }
 
-class GrandParents(db.Model, BasicMode):
-    id = db.Column(db.Integer, primary_key=True)
+class GrandParents(db.Model, BasicModel):
+    __tablename__ = "grandparents"
+    id_grandparents = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
     last_name = db.Column(db.String(80), unique=False, nullable=False)
     age = db.Column(db.Integer, nullable=False)
@@ -41,7 +43,8 @@ class GrandParents(db.Model, BasicMode):
             "age": self.age
             # do not serialize the password, its a security breach
         }
-class Parents(db.Model, BasicMode):
+class Parents(db.Model, BasicModel):
+    __tablename__ = "parents"
     id_parents = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
     last_name = db.Column(db.String(80), unique=False, nullable=False)
@@ -57,7 +60,8 @@ class Parents(db.Model, BasicMode):
             # do not serialize the password, its a security breach
         }
 
-class Children(db.Model, BasicMode):
+class Children(db.Model, BasicModel):
+    __tablename__ = "children"
     id_children = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
     last_name = db.Column(db.String(80), unique=False, nullable=False)
@@ -72,3 +76,18 @@ class Children(db.Model, BasicMode):
             "age": self.age
             # do not serialize the password, its a security breach
         }
+class Select_family(BasicModel,db.Model):
+    __tablename__ = 'select_family'
+    id = db.Column(db.Integer, primary_key=True)
+    grandparents_id = db.Column(db.Integer, db.ForeignKey('parents.id_grandparents'))
+    parents_id = db.Column(db.Integer, db.ForeignKey('parents.id_parents'))
+    children_id = db.Column(db.Integer, db.ForeignKey('planets.id_children'))
+    
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "grandparents_id": self.grandparents_id,
+            "parents_id": self.parents_id,
+            "children_id":self.children_id,
+            }
