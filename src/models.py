@@ -35,6 +35,15 @@ class GrandParents(db.Model, BasicModel):
     age = db.Column(db.Integer, nullable=False)
     parents_id = db.Column(db.Integer, db.ForeignKey('parents.id_parents'))
 
+    def db_post(self):        
+        db.session.add(self)
+        db.session.commit()
+    
+    def set_granpa(self,json):
+        self.name = json["name"]
+        self.last_name = json["last_name"]
+        self.age = json["age"]
+        return self
     
     def serialize(self):
         return {
@@ -54,7 +63,16 @@ class Parents(db.Model, BasicModel):
     grandparents_id = db.Column(db.Integer, db.ForeignKey('parents.id_grandparents'))
     children_id = db.Column(db.Integer, db.ForeignKey('planets.id_children'))
 
+    def db_post(self):        
+        db.session.add(self)
+        db.session.commit()
     
+    def set_parents(self,json):
+        self.name = json["name"]
+        self.last_name = json["last_name"]
+        self.age = json["age"]
+        return self
+
     def serialize(self):
         return {
             "id": self.id,
@@ -73,6 +91,16 @@ class Children(db.Model, BasicModel):
     last_name = db.Column(db.String(80), unique=False, nullable=False)
     age = db.Column(db.Integer, nullable=False)
     parents_id = db.Column(db.Integer, db.ForeignKey('parents.id_parents'))
+
+    def db_post(self):        
+        db.session.add(self)
+        db.session.commit()
+    
+    def set_children(self,json):
+        self.name = json["name"]
+        self.last_name = json["last_name"]
+        self.age = json["age"]
+        return self
     
     def serialize(self):
         return {

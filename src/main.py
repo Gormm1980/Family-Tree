@@ -20,6 +20,10 @@ db.init_app(app)
 CORS(app)
 setup_admin(app)
 
+@app.route('/')
+def sitemap():
+    return generate_sitemap(app)
+
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
@@ -28,11 +32,19 @@ def handle_invalid_usage(error):
 # generate sitemap with all your endpoints
 @app.route("/grandparents",methods=['GET'])
 def all_grandpa():
-    grandparents = GrandParents.get_all()
+    grandpa = GrandParents.get_all()
     grandpa_Dic = []
     for person in grandparents :
        grandpa_Dic.append(person.serialize())
     return jsonify(grandpa_Dic)
+
+@app.route("/grandparents",methods=['POST'])
+def adding_grandpa():
+    json = request.get_json()
+    print (json)
+    granpa = granpa.set_granpa(GrandParents(),json)
+    GrandParents.db_post(granpa)
+    return jsonify(granpa.serialize())
 
 @app.route("/grandparents/<int:grandparents_id>",methods=['GET'])
 def get_one_grandpa(grandparents_id):
@@ -48,6 +60,14 @@ def all_parents():
        parents_Dic.append(person.serialize())
     return jsonify(parents_Dic)
 
+@app.route("/parents",methods=['POST'])
+def adding_parents():
+    json = request.get_json()
+    print (json)
+    parents = Parents.set_parents(Parents(),json)
+    Parents.db_post(parents)
+    return jsonify(parents.serialize())
+
 @app.route("/parents/<int:parents_id>",methods=['GET'])
 def get_one_parent(parents_id):
     parents = Parents.get_one(parents_id)
@@ -61,6 +81,14 @@ def all_children():
     for person in children :
        children_Dic.append(person.serialize())
     return jsonify(children_Dic)
+
+@app.route("/grandparents",methods=['POST'])
+def adding_child():
+    json = request.get_json()
+    print (json)
+    children = Children.set_children(Child(),json)
+    Children.db_post(children)
+    return jsonify(children.serialize())
 
 @app.route("/children/<int:children_id>",methods=['GET'])
 def get_one_children(children_id):
