@@ -11,22 +11,6 @@ class BasicModel():
     def get_member(cls,model_id):
         return cls.query.filter_by(id = model_id).first()
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(80), unique=False, nullable=False)
-    is_active = db.Column(db.Boolean(), unique=False, nullable=False)
-
-    def __repr__(self):
-        return '<User %r>' % self.username
-
-    def serialize(self):
-        return {
-            "id": self.id,
-            "email": self.email,
-            # do not serialize the password, its a security breach
-        }
-
 class GrandParents(db.Model, BasicModel):
     __tablename__ = "grandparents"
     id_grandparents = db.Column(db.Integer, primary_key=True)
@@ -34,6 +18,9 @@ class GrandParents(db.Model, BasicModel):
     last_name = db.Column(db.String(80), unique=False, nullable=False)
     age = db.Column(db.Integer, nullable=False)
     parents_id = db.Column(db.Integer, db.ForeignKey('parents.id_parents'))
+    childs_id = db.Column(db.Integer, db.ForeignKey('childrens.id_children'))
+    childs = db.relationship('Childrens', lazy='dynamyc', backref='childrens', primaryjoin="Childrens.id_children==GrandParents.id_grandparents")
+    parents = db.relationship('Parents', lazy='dynamic', backref='parents', primaryjoin="Parents.id_parents==GrandParents.id_grandparents")
 
     def db_post(self):        
         db.session.add(self)
@@ -47,11 +34,10 @@ class GrandParents(db.Model, BasicModel):
     
     def serialize(self):
         return {
-            "id": self.id,
+            "id_grandparents": self.id_grandparents,
             "name": self.name,
             "last_name": self.last_name,
             "age": self.age,
-            "parents_id": self.parents_id
             # do not serialize the password, its a security breach
         }
 class Parents(db.Model, BasicModel):
@@ -60,8 +46,14 @@ class Parents(db.Model, BasicModel):
     name = db.Column(db.String(120), unique=True, nullable=False)
     last_name = db.Column(db.String(80), unique=False, nullable=False)
     age = db.Column(db.Integer, nullable=False)
-    grandparents_id = db.Column(db.Integer, db.ForeignKey('parents.id_grandparents'))
-    children_id = db.Column(db.Integer, db.ForeignKey('planets.id_children'))
+    grandparent_id = db.Column(db.Integer, db.ForeignKey('grandparents.id_grandparents'))
+    child_id = db.Column(db.Integer, db.ForeignKey('childrens.id_children'))
+
+    grandparents = db.relationship('GrandParents', lazy='dynamyc', backref='grandparents', primaryjoin="GrandParents.id_Grandparents==Parents.id_parents")
+    childs = db.relationship('Childrens', lazy='dynamyc', backref='childrens', primaryjoin="Childrens.id_children==Parents.id_parents")
+    # childrens = db.relationship('Children', secondary=tags, lazy='subquery', backref=db.backref('parents', lazy=True))
+    # grandparents = db.relationship('GrandParents', secondary=tags, lazy='subquery', backref=db.backref('parents', lazy=True))
+    
 
     def db_post(self):        
         db.session.add(self)
@@ -75,22 +67,23 @@ class Parents(db.Model, BasicModel):
 
     def serialize(self):
         return {
-            "id": self.id,
+            "id_parents": self.id_parents,
             "name": self.name,
             "last_name": self.last_name,
             "age": self.age,
-            "grandparents_id": self.grandparents_id,
-            "children_id": self.children_id
             # do not serialize the password, its a security breach
         }
 
-class Children(db.Model, BasicModel):
+class Childrens(db.Model, BasicModel):
     __tablename__ = "children"
     id_children = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
     last_name = db.Column(db.String(80), unique=False, nullable=False)
     age = db.Column(db.Integer, nullable=False)
     parents_id = db.Column(db.Integer, db.ForeignKey('parents.id_parents'))
+    grandpa_id = db.Column(db.Integer, db.ForeignKey('granparents.id_grandparents'))
+    parents = db.relationship('Parents', lazy='dynamic', backref='parents', primaryjoin="Parents.id_parents==Childrens.id_children")
+    grandparents = db.relationship('GrandParents', lazy='dynamyc', backref='grandparents', primaryjoin="GrandParents.id_Grandparents==Childrens.id_children")
 
     def db_post(self):        
         db.session.add(self)
@@ -104,10 +97,20 @@ class Children(db.Model, BasicModel):
     
     def serialize(self):
         return {
-            "id": self.id,
+            "id_children": self.id_children,
             "name": self.name,
             "last_name": self.last_name,
             "age": self.age,
-            "parents_id": self.parents_id
             # do not serialize the password, its a security breach
         }
+# family = db.Table('family'),
+#     db.Column('parents_id', db.Integer, db.ForeignKey('parents.id_parents'), primary_key=True),
+#     db.Column('grandparents_id', db.Integer, db.ForeignKey('grandparents.id_grandparents'), primary_key=True)
+#     db.Column('children_id', db.Integer, db.ForeignKey('children.id_children'), primary_key=True)
+
+
+
+
+
+
+

@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, GrandParents, Parents, Children
+from models import db, GrandParents, Parents, Childrens
 #from models import Person
 
 app = Flask(__name__)
@@ -49,6 +49,7 @@ def adding_grandpa():
 @app.route("/grandparents/<int:grandparents_id>",methods=['GET'])
 def get_one_grandpa(grandparents_id):
     grandparents = GrandParents.get_one(grandparents_id)
+    Children = Childre.query.filter_by(parents_id = grandparents.parents_id)
     grandparents_serialized = grandparents.serialized()
     return jsonify(grandparents_serialized)
 
@@ -74,7 +75,7 @@ def get_one_parent(parents_id):
     parents_serialized = parents.serialized()
     return jsonify(parents_serialized)
 
-@app.route("/children",methods=['GET'])
+@app.route("/childrens",methods=['GET'])
 def all_children():
     children = Children.get_all()
     children_Dic = []
@@ -82,7 +83,7 @@ def all_children():
        children_Dic.append(person.serialize())
     return jsonify(children_Dic)
 
-@app.route("/grandparents",methods=['POST'])
+@app.route("/childrens",methods=['POST'])
 def adding_child():
     json = request.get_json()
     print (json)
@@ -90,20 +91,12 @@ def adding_child():
     Children.db_post(children)
     return jsonify(children.serialize())
 
-@app.route("/children/<int:children_id>",methods=['GET'])
+@app.route("/childrens/<int:children_id>",methods=['GET'])
 def get_one_children(children_id):
     children = Children.get_one(children_id)
     children_serialized = children.serialized()
     return jsonify(children_serialized)
 
-@app.route('/user', methods=['GET'])
-def handle_hello():
-
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
-
-    return jsonify(response_body), 200
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
