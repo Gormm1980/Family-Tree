@@ -8,8 +8,8 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, GrandParents, Parents, Childrens
-#from models import Person
+from models import db, User
+#from// models import member
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -20,83 +20,43 @@ db.init_app(app)
 CORS(app)
 setup_admin(app)
 
-@app.route('/')
-def sitemap():
-    return generate_sitemap(app)
-
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
 
 # generate sitemap with all your endpoints
-@app.route("/grandparents",methods=['GET'])
-def all_grandpa():
-    grandpa = GrandParents.get_all()
-    grandpa_Dic = []
-    for person in grandparents :
-       grandpa_Dic.append(person.serialize())
-    return jsonify(grandpa_Dic)
+@app.route('/')
+def sitemap():
+    return generate_sitemap(app)
 
-@app.route("/grandparents",methods=['POST'])
-def adding_grandpa():
-    json = request.get_json()
-    print (json)
-    granpa = granpa.set_granpa(GrandParents(),json)
-    GrandParents.db_post(granpa)
-    return jsonify(granpa.serialize())
+@app.route('/user', methods=['GET'])
+def handle_hello():
 
-@app.route("/grandparents/<int:grandparents_id>",methods=['GET'])
-def get_one_grandpa(grandparents_id):
-    grandparents = GrandParents.get_one(grandparents_id)
-    Children = Childre.query.filter_by(parents_id = grandparents.parents_id)
-    grandparents_serialized = grandparents.serialized()
-    return jsonify(grandparents_serialized)
+    response_body = {
+        "msg": "Hello, this is your GET /user response "
+    }
 
-@app.route("/parents",methods=['GET'])
-def all_parents():
-    parents = Parents.get_all()
-    parents_Dic = []
-    for person in parents :
-       parents_Dic.append(person.serialize())
-    return jsonify(parents_Dic)
+    return jsonify(response_body), 200
 
-@app.route("/parents",methods=['POST'])
-def adding_parents():
-    json = request.get_json()
-    print (json)
-    parents = Parents.set_parents(Parents(),json)
-    Parents.db_post(parents)
-    return jsonify(parents.serialize())
 
-@app.route("/parents/<int:parents_id>",methods=['GET'])
-def get_one_parent(parents_id):
-    parents = Parents.get_one(parents_id)
-    parents_serialized = parents.serialized()
-    return jsonify(parents_serialized)
+@app.route('/all', methods=['GET'])
+def get_all():
+    members = Member.query.order_by(desc(Member.age)).all()
+    members_dic = []
+    for member in members:
+        members_dic.append(member.serialize()) 
 
-@app.route("/childrens",methods=['GET'])
-def all_children():
-    children = Children.get_all()
-    children_Dic = []
-    for person in children :
-       children_Dic.append(person.serialize())
-    return jsonify(children_Dic)
+    return jsonify(members_dic),200
 
-@app.route("/childrens",methods=['POST'])
-def adding_child():
-    json = request.get_json()
-    print (json)
-    children = Children.set_children(Child(),json)
-    Children.db_post(children)
-    return jsonify(children.serialize())
 
-@app.route("/childrens/<int:children_id>",methods=['GET'])
-def get_one_children(children_id):
-    children = Children.get_one(children_id)
-    children_serialized = children.serialized()
-    return jsonify(children_serialized)
-
+@app.route('/member/<int:id>', methods=['GET'])
+def show_member(id):
+    member = member.query.filter_by(id = id).first()
+    father = member.query.filter_by(id = member.parent_id).first()
+    children = member.query.filter_by(parent_id = id).first()
+    family = {"members": member.serialize(), "father": father.serialize(), "child": children.serialize()}
+    return jsonify(family),200
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
