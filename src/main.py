@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, grand_parents,parents,children
 #from// models import member
 
 app = Flask(__name__)
@@ -40,23 +40,35 @@ def handle_hello():
     return jsonify(response_body), 200
 
 
-@app.route('/all', methods=['GET'])
-def get_all():
-    members = Member.query.order_by(desc(Member.age)).all()
-    members_dic = []
-    for member in members:
-        members_dic.append(member.serialize()) 
+@app.route('/grandparents', methods=['GET'])
+def get_all_grandparents():    
+    grandparents_all= grandparents.query.all()
+    actual_grandparents = []
+    for gen in grandparents_all:
+        print(gen.serialize())
+        actual_grandparents.append(gen.serialize())
 
-    return jsonify(members_dic),200
+    return jsonify(actual_grandparents), 200
 
+@app.route('/parents', methods=['GET'])
+def get_all_parents():    
+    parents_all = parents.query.all()
+    actual_parents = []
+    for gen in parents_all:
+        print(gen.serialize())
+        actual_parents.append(gen.serialize())
 
-@app.route('/member/<int:id>', methods=['GET'])
-def show_member(id):
-    member = member.query.filter_by(id = id).first()
-    father = member.query.filter_by(id = member.parent_id).first()
-    children = member.query.filter_by(parent_id = id).first()
-    family = {"members": member.serialize(), "father": father.serialize(), "child": children.serialize()}
-    return jsonify(family),200
+    return jsonify(actual_parents), 200    
+
+@app.route('/children', methods=['GET'])
+def get_all_children():    
+    children_all = children.query.all()
+    actual_children = []
+    for gen in children_all:
+        print(gen.serialize())
+        actual_children.append(gen.serialize())
+
+    return jsonify(actual_children), 200    
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':

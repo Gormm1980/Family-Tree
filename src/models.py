@@ -2,107 +2,67 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(80), unique=False, nullable=False)
-    is_active = db.Column(db.Boolean(), unique=False, nullable=False)
-
-    def __repr__(self):
-        return '<User %r>' % self.username
-
-    def serialize(self):
-        return {
-            "id": self.id,
-            "email": self.email,
-            # do not serialize the password, its a security breach
-        }
-
-class Member(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120))
-    last_name = db.Column(db.String(80))
-    age = db.Column(db.Integer)
-    parent_id = db.Column(db.Integer, db.ForeignKey('member.id'))
-    parent = db.relationship('Member')
-
-
-    def __repr__(self):
-        return '<Member %s' % self.name
-
-    def serialize(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "last name": self.last_name,
-            "age": self.age,
-            "parent_id": self.parent_id,
-            # do not serialize the password, its a security breach
-        }
-class GrandParents(db.Model):
-    __tablename__ = 'grandparents'
+class grand_parents(db.Model):
+    __tablename__ = 'grand_parents'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
-    last_name = db.Column(db.String(80), unique=False, nullable=False)
-    age = db.Column(db.Integer, nullable=False)
-  
-    
+    last_name = db.Column(db.String(120), unique=True, nullable=False)
+    age = db.Column(db.String(3), unique=False, nullable=False)
+    children_id = db.Column(db.Integer, db.ForeignKey('parents.id'), nullable=False)
+   
 
-    
+    def __repr__(self):
+        return '<grand_parents %r>' % self.name
+
     def serialize(self):
         return {
             "id": self.id,
             "name": self.name,
             "last_name": self.last_name,
-            "age": self.age,
-            # do not serialize the password, its a security breach
+            "age": self.age
+
         }
 
-class Parents(db.Model):
+class parents(db.Model):
     __tablename__ = 'parents'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
-    last_name = db.Column(db.String(80), unique=False, nullable=False)
-    age = db.Column(db.Integer, nullable=False)
-    grandparent_id = db.Column(db.Integer, db.ForeignKey('grandparents.id'))
-    grandparent = db.relationship('GrandParents')
-    
+    last_name = db.Column(db.String(120), unique=True, nullable=False)
+    age = db.Column(db.String(3), unique=False, nullable=False)
+    children_id = db.Column(db.Integer, db.ForeignKey('children.id'), nullable=False)
+    grand_parents = db.relationship('grand_parents', lazy=True)
 
-    
+    def __repr__(self):
+        return '<parents %r>' % self.id
+
     def serialize(self):
         return {
             "id": self.id,
             "name": self.name,
             "last_name": self.last_name,
-            "age": self.age,
-            "grandparent_id": self.grandparent_id
-            # do not serialize the password, its a security breach
+            "age": self.age
+
+
         }
 
-
-
-class Current_Generation(db.Model):
-    __tablename__ = 'current_generation'
+class children(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
     last_name = db.Column(db.String(80), unique=False, nullable=False)
-    age = db.Column(db.Integer, nullable=False)
-    parent_id = db.Column(db.Integer, db.ForeignKey('parents.id'))
-    parent = db.relationship('Parents')
+    age = db.Column(db.String(3), unique=False, nullable=False)
+    grand_parents = db.relationship('parents', lazy=True)
 
-    
+
+    def __repr__(self):
+        return '<children %r>' % self.id
+
     def serialize(self):
         return {
             "id": self.id,
             "name": self.name,
             "last_name": self.last_name,
-            "age": self.age,
-            "parent_id": self.parent_id
-            # do not serialize the password, its a security breach
+            "age": self.age
+ 
         }
-
-
-
-
 
 
